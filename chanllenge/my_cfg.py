@@ -30,6 +30,7 @@ class Cfg_load(object):
          for i in temp:
              total_rate += self.data[i]
          return total_rate
+
   
             
            
