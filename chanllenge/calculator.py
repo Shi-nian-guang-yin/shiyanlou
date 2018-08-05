@@ -6,19 +6,6 @@ from math import pow
 from my_cfg import Cfg_load
 from salary import salary_get
 secure = 0
-"""
-def salary_get(path):
-    pf = open(path,'r')
-    salary_data = csv.reader(pf,delimiter=',')
-    pf.close()
-    work_num = []
-    origin_salary = []
-    for row in salary_data:
-        num = row[0]
-        a_salary = row[1]
-    num_sa_dict = dict(zip(num,a_salary))
-    return num_sa_dict
-"""
 def calc_tax(my_salary):
     global secure
     Fast_calc_symbol = [0,105,555,1005,2755,5055,13505]
@@ -57,6 +44,8 @@ if __name__ == "__main__":
         cf_path,ur_path,out_path = get_path(url_string)
         safe_cfg =Cfg_load(cf_path) 
         secure = safe_cfg.get_final_rate()
+        shebaoH = safe_cfg.get_value('JiShuH')
+        shebaoL = safe_cfg.get_value('JiShuL')
  #       pdb.set_trace()
         usr_num,usr_data = salary_get(ur_path)
        # usr_list = list(usr_data.keys())
@@ -66,7 +55,13 @@ if __name__ == "__main__":
         write = csv.writer(pf)
   #      pdb.set_trace()
         for i in usr_num:
-            sb_temp = int(usr_data[i])
+            st_temp = int(usr_data[i])
+            if st_temp > shebaoL and st_temp < shebaoH:
+                sb_temp = st_temp
+            elif st_temp < shebaoL:
+                sb_temp = shebaoL
+            elif st_temp > shebaoH:
+                sb_temp = shebaoH
             write_table.clear()
             write_table.append(i)
             write_table.append(usr_data[i])
