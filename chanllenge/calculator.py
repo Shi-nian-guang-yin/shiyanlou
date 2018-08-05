@@ -67,8 +67,6 @@ def salary_get(path):
 # 填写文件的一行数据
 def calc_tax(usr_num,usr_sa,**cfg):
 
- #   usr_sa = namedtuple('oringin_sa','work_num','all_salary','shebao','tax','after_sa')
-    sa = usr_sa
     secure = safe_cfg.get_final_rate()
     bx_L = cfg['JiShuL']
     bx_H = cfg['JiShuH']
@@ -80,7 +78,7 @@ def calc_tax(usr_num,usr_sa,**cfg):
 
     write_table.clear()
     my_salary = int(usr_sa)
-    write_table.append(work_num)
+    write_table.append(usr_num)
     write_table.append(my_salary)
     if my_salary < bx_H and my_salary < bx_L:
         middlie_sb =  my_salary
@@ -88,7 +86,7 @@ def calc_tax(usr_num,usr_sa,**cfg):
         middlie_sb =  bx_H  
     elif my_salary < bx_L:
          middlie_sb =  bx_L
-    sb = middlie_sb * secure #sb = 社保
+    sb = middlie_sb * secure 
     write_table.append(format(sb, '.2f'))
     if( my_salary-sb) > 3500:
         true_salary = my_salary-sb - 3500
@@ -112,17 +110,18 @@ import pdb
 if __name__ == "__main__":
     try:
         url_string  = sys.argv[1:]
-        cf_path,ur_path,out_path = get_path(url_string)#读取三个路径参数
-        safe_cfg = Cfg_load(cf_path) #加载设置参数
-        usr_data = salary_get(ur_path)#加载工号+工资
+        cf_path,ur_path,out_path = get_path(url_string)
+        safe_cfg = Cfg_load(cf_path) 
+        usr_data = salary_get(ur_path)
 #        shebaoH = safe_cfg.get_value('JiShuH')
 #        shebaoL = safe_cfg.get_value('JiShuL')
         pf = open(out_path,'w')
         write = csv.writer(pf)
-        for u_id,u_sa in usr_data#遍历工资字典
-            if int(u_sa) < 0
+        for u_id,u_id in usr_data.items():
+            if int(u_sa) < 0:
                 raise ValueError()
-            w_data = calc_tax(u_id,u_sa,safe_cfg)
+            pdb.set_trace()  
+            w_data = calc_tax(u_id,u_sa,safe_cfg.data)
             write.writerow(w_data)
         pf.close()
     except IndexError:
