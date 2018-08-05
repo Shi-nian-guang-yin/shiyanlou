@@ -15,8 +15,8 @@ def salary_get(path):
         origin_salary.append(a_salary)
     num_sa_dict = dict(zip(work_num,origin_salary))
     pf.close()
-    return num_sa_dict
-
+    return work_num,num_sa_dict
+   # return work_num,origin_salary
 if __name__ == "__main__":
 #    print(sys.argv[1])
     c= salary_get(sys.argv[1])   

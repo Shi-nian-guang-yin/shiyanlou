@@ -9,10 +9,10 @@ class Cfg_load(object):
         self.para = []
         self.rate = []
         self.orgin_data = str_stream.split('\n')
-        print(self.orgin_data)
+       # print(self.orgin_data)
         for data in self.orgin_data:
             temp  = data.split('=')
-            print(temp)
+        #    print(temp)
             self.para.append(temp[0].strip())
             self.rate.append(float(temp[1].strip()))
         self.data = dict(zip(self.para,self.rate))
