@@ -5,6 +5,9 @@ import sys
 import csv
 from math import pow
 
+import pdb 
+
+
 
 mail1 = Queue()
 mail2 = Queue()
@@ -105,16 +108,15 @@ def calc_tax(usr_num,usr_sa,**cfg):
     return write_table
 
 
-import pdb 
-#pdb.set_trace()  
 
-def post_usr_data(path_u,lock):
 
+def post_usr_data(path_u):
+    pdb.set_trace()
     usr_data = salary_get(path_u)  
     mail1.put(usr_data)
 
-def post_final_data(cfg,lock):
-
+def post_final_data(cfg):
+    pdb.set_trace()
     post_data_list = []
     pro_data = mail1.get()
     for u_id,u_sa in pro_data.items():
@@ -125,8 +127,8 @@ def post_final_data(cfg,lock):
         post_data_list.append(w_data)
     mail2.put(post_data_list)
 
-def write_data(w_path,lock):
-
+def write_data(w_path):
+    pdb.set_trace()
     w_list =  mail2.get()
     pf = open(w_path,'w')
     write = csv.writer(pf)
@@ -140,7 +142,7 @@ if __name__ == "__main__":
         cf_path,ur_path,out_path = get_path(url_string)
         safe_cfg = Cfg_load(cf_path)
         secure = safe_cfg.get_final_rate()
-        
+        safe_cfg_data = safe_cfg.data
 #        shebaoH = safe_cfg.get_value('JiShuH')
 #        shebaoL = safe_cfg.get_value('JiShuL')
 
