@@ -1,8 +1,12 @@
 #_*_  coding:utf8 _*_
 #!/usr/bin/env python3
+from multiprocessing import Process, Queue 
 import sys
 import csv
 from math import pow
+mail1 = Queue()
+mail2 = Queue()
+
 global secure
 
 def get_path(string):
@@ -68,8 +72,8 @@ def salary_get(path):
 # 填写文件的一行数据
 def calc_tax(usr_num,usr_sa,**cfg):
     global secure
-    bx_L = int(cfg['cfg']['JiShuL'])
-    bx_H = int(cfg['cfg']['JiShuH'])
+    bx_L = int(cfg['JiShuL'])
+    bx_H = int(cfg['JiShuH'])
     User = usr_data
     Fast_calc_symbol = [0,105,555,1005,2755,5055,13505]
     Compare_list = [1500,4500,9000,35000,55000,80000,pow(2,64)]
@@ -107,25 +111,54 @@ def calc_tax(usr_num,usr_sa,**cfg):
 
 import pdb 
 #pdb.set_trace()  
+
+def post_usr_data(path_u):
+    usr_data = salary_get(path_u)  
+    mail1.put(usr_data)
+
+def post_final_data(cfg):
+    post_data_list = []
+    pro_data = mail1.get()
+    for u_id,u_sa in pro_data.items():
+        if int(u_sa) < 0:
+            raise ValueError()
+        #   pdb.set_trace()  
+        w_data = calc_tax(usr_num=u_id,usr_sa=u_sa,**cfg)
+        post_data_list.append(w_data)
+    mail2.put(post_data_list)
+
+def write_data(w_path):
+    w_list =  mail2.get()
+    pf = open(w_path,'w')
+    write = csv.writer(pf)
+    write.writerows(w_list)
+    pf.close()
+
 if __name__ == "__main__":
     try:
         global secure
         url_string  = sys.argv[1:]
         cf_path,ur_path,out_path = get_path(url_string)
         safe_cfg = Cfg_load(cf_path)
+        safe_cfg_data = safe_cfg.data
         secure = safe_cfg.get_final_rate()
-        usr_data = salary_get(ur_path)
+        
 #        shebaoH = safe_cfg.get_value('JiShuH')
 #        shebaoL = safe_cfg.get_value('JiShuL')
-        pf = open(out_path,'w')
-        write = csv.writer(pf)
-        for u_id,u_sa in usr_data.items():
-            if int(u_sa) < 0:
-                raise ValueError()
-         #   pdb.set_trace()  
-            w_data = calc_tax(usr_num=u_id,usr_sa=u_sa,cfg=safe_cfg.data)
-            write.writerow(w_data)
-        pf.close()
+
+        p1=Process(target=post_usr_data,args=(ur_path,))
+        p2=Process(target=post_final_data,args=(safe_cfg_data,))
+        p3=Process(target=write_data,args=(out_path,))
+
+        p1.start()
+        p2.start()
+        p3.start()
+
+        p1.join()
+        p2.join()
+        p3.join()
+        
+
     except IndexError:
 #  print('number %d parameter is fault'%count)    
         print('Parameter Error')
