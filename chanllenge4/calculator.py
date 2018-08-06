@@ -1,9 +1,11 @@
 #_*_  coding:utf8 _*_
 #!/usr/bin/env python3
-from multiprocessing import Process, Queue 
+from multiprocessing import Process, Queue ,Lock
 import sys
 import csv
 from math import pow
+import os, time, random
+
 mail1 = Queue()
 mail2 = Queue()
 
@@ -112,27 +114,33 @@ def calc_tax(usr_num,usr_sa,**cfg):
 import pdb 
 #pdb.set_trace()  
 
-def post_usr_data(path_u):
-    usr_data = salary_get(path_u)  
-    mail1.put(usr_data)
+def post_usr_data(path_u,lock):
+    time.sleep(random.random())
+    with lock:
+        usr_data = salary_get(path_u)  
+        mail1.put(usr_data)
 
-def post_final_data(cfg):
-    post_data_list = []
-    pro_data = mail1.get()
-    for u_id,u_sa in pro_data.items():
-        if int(u_sa) < 0:
-            raise ValueError()
-        #   pdb.set_trace()  
-        w_data = calc_tax(usr_num=u_id,usr_sa=u_sa,**cfg)
-        post_data_list.append(w_data)
-    mail2.put(post_data_list)
+def post_final_data(cfg,lock):
+    time.sleep(random.random())
+    with lock:
+        post_data_list = []
+        pro_data = mail1.get()
+        for u_id,u_sa in pro_data.items():
+            if int(u_sa) < 0:
+                raise ValueError()
+            #   pdb.set_trace()  
+            w_data = calc_tax(usr_num=u_id,usr_sa=u_sa,**cfg)
+            post_data_list.append(w_data)
+        mail2.put(post_data_list)
 
-def write_data(w_path):
-    w_list =  mail2.get()
-    pf = open(w_path,'w')
-    write = csv.writer(pf)
-    write.writerows(w_list)
-    pf.close()
+def write_data(w_path,lock):
+    time.sleep(random.random())
+    with lock:
+        w_list =  mail2.get()
+        pf = open(w_path,'w')
+        write = csv.writer(pf)
+        write.writerows(w_list)
+        pf.close()
 
 if __name__ == "__main__":
     try:
@@ -145,10 +153,10 @@ if __name__ == "__main__":
         
 #        shebaoH = safe_cfg.get_value('JiShuH')
 #        shebaoL = safe_cfg.get_value('JiShuL')
-
-        p1=Process(target=post_usr_data,args=(ur_path,))
-        p2=Process(target=post_final_data,args=(safe_cfg_data,))
-        p3=Process(target=write_data,args=(out_path,))
+        lock = Lock()
+        p1=Process(target=post_usr_data,args=(ur_path,lock))
+        p2=Process(target=post_final_data,args=(safe_cfg_data,lock))
+        p3=Process(target=write_data,args=(out_path,lock))
 
         p1.start()
         p2.start()
