@@ -1,6 +1,6 @@
 #_*_  coding:utf8 _*_
 #!/usr/bin/env python3
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue ,Lock
 import sys
 import csv
 from math import pow
@@ -145,16 +145,23 @@ if __name__ == "__main__":
         safe_cfg_data = safe_cfg.data
 #        shebaoH = safe_cfg.get_value('JiShuH')
 #        shebaoL = safe_cfg.get_value('JiShuL')
-
+#       lock = Lock()
         p1 = Process(target=post_usr_data,args=(ur_path,))
         p2 = Process(target=post_final_data,args=(safe_cfg_data,))
         p3 = Process(target=write_data,args=(out_path,))
-
+'''
+        p1 = Process(target=post_usr_data,args=(ur_path,lock))
+        p2 = Process(target=post_final_data,args=(safe_cfg_data,lock))
+        p3 = Process(target=write_data,args=(out_path,lock))
+'''
         p1.start()
         p2.start()
         p3.start()
-
-
+'''
+        p1.join()  #堵塞 main 获取异常
+        p2.join()
+        p3.join()
+'''
         
 
     except IndexError:
